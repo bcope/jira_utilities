@@ -3,12 +3,17 @@
 <!-- TOC -->
 
 - [Overview](#overview)
+- [Running the container](#running-the-container)
+- [Assumptions](#assumptions)
+  - [Environment variables](#environment-variables)
 - [Plans](#plans)
+  - [Main script to handle calls to other scripts](#main-script-to-handle-calls-to-other-scripts)
   - [Jira client class](#jira-client-class)
-  - [Sprint management script](#sprint-management-script)
   - [Group membership management](#group-membership-management)
   - [Team membership management](#team-membership-management)
   - [Team / Group sync script](#team--group-sync-script)
+  - [Bulk edit Issue sprints to multiple sprints determined by Board](#bulk-edit-issue-sprints-to-multiple-sprints-determined-by-board)
+  - [Sprint management script](#sprint-management-script)
   - [Board Quick Filter management](#board-quick-filter-management)
 - [Ideas](#ideas)
   - [Fastmail Calendar Integration](#fastmail-calendar-integration)
@@ -22,19 +27,26 @@ Contains utility scripts useful for Jira administrators and power users.
 
 ## Assumptions
 
+### Docker
+
+This code is run in a Python 3.7 Docker container. You will need Docker installed locally.
+
 ### Environment variables
 
 - JIRA_USER
 - JIRA_API_TOKEN
 - JIRA_SERVER
 
+## Running the container
+
+```sh
+docker run --rm -e JIRA_USER=$JIRA_USER -e JIRA_API_KEY=$JIRA_API_KEY -e JIRA_SERVER=$JIRA_SERVER jira_utilities
+# add required arguments for main.py
+```
+
 ## Plans
 
 Sections here are currently planned to be implemented.
-
-### Docker container
-
-This code will be executable in a Docker container.
 
 ### Main script to handle calls to other scripts
 
