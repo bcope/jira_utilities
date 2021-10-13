@@ -1,3 +1,9 @@
+"""
+
+Jira API Documentation: https://developer.atlassian.com/cloud/jira/platform/rest/v3/intro/
+
+"""
+
 import os
 
 import requests
@@ -104,6 +110,7 @@ class JiraClient:
     
     def get_all_groups(self):
         """This obtains all groups in the Jira instances.
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get
 
         Returns:
             list: Returns a list of dicts where each dict is a group records
@@ -127,6 +134,7 @@ class JiraClient:
 
     def add_user_to_group(self, group, user):
         """API wrapper function to add a user to a group
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-user-post
 
         Args:
             group (dict): This should be a dict that represents a group and contain at least the
@@ -146,6 +154,7 @@ class JiraClient:
 
     def remove_user_from_group(self, group, user):
         """API wrapper function to remove a user from a group
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-user-delete
 
         Args:
             group (dict): This should be a dict that represents a group and contain at least the
