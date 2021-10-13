@@ -144,8 +144,9 @@ class JiraClient:
         Returns:
             list: Returns a list of dicts where each dict is a group records
         """
-        return self._get_all_paginated_results(f"{self.url_api_3}/group/bulk")
-
+        all_groups = self._get_all_paginated_results(f"{self.url_api_3}/group/bulk")
+        valid_groups = [g for g in all_groups if not g['name'].startswith('atlassian-addons')]
+        return valid_groups
     def get_all_groups_with_members(self):
         """This obtains all groups in the Jira instances and includes a new key in the group record
         `member` and adds all users records in the key that have membership in the group.
