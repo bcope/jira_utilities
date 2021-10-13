@@ -103,10 +103,39 @@ class JiraClient:
     
     ### GROUP METHODS ###
     def create_group(self, group):
-        raise NotImplementedError
+        """API wrapper function to create a group
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-post
+
+        Args:
+            group (dict): This should be a dict that represents a group and contain at least the
+                `name` key.
+
+        Returns:
+            requests.Response: Returns the response from the API call
+        """
+        _LOGGER.debug(f"group: {group}")
+        response = self._session.post(
+            f"{self.url_api_3}/group",
+            json={'name': group['name']}
+        )
+        return response
 
     def delete_group(self, group):
-        raise NotImplementedError
+        """API wrapper function to delete a group
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-delete
+
+        Args:
+            group (dict): This should be a dict that represents a group and contain at least the
+                `name` key.
+
+        Returns:
+            requests.Response: Returns the response from the API call
+        """
+        response = self._session.delete(
+            f"{self.url_api_3}/group",
+            params={'groupname': group['name']}
+        )
+        return response
     
     def get_all_groups(self):
         """This obtains all groups in the Jira instances.
