@@ -35,12 +35,12 @@ This code is run in a Python 3.7 Docker container. You will need Docker installe
 
 - JIRA_USER
 - JIRA_API_TOKEN
-- JIRA_SERVER
+- JIRA_URL
 
 ## Running the container
 
 ```sh
-docker run --rm -e JIRA_USER=$JIRA_USER -e JIRA_API_KEY=$JIRA_API_KEY -e JIRA_SERVER=$JIRA_SERVER jira_utilities
+docker run --rm -e JIRA_USER=$JIRA_USER -e JIRA_API_TOKEN=$JIRA_API_TOKEN -e JIRA_URL=$JIRA_URL jira_utilities
 # add required arguments for main.py
 ```
 
