@@ -147,6 +147,23 @@ class JiraClient:
         all_groups = self._get_all_paginated_results(f"{self.url_api_3}/group/bulk")
         valid_groups = [g for g in all_groups if not g['name'].startswith('atlassian-addons')]
         return valid_groups
+
+    def get_group_members(self, group):
+        """This obtains all users associated with a group.
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-member-get
+        
+        Args:
+            group (dict): This should be a dict that represents a group and contain at least the
+                `name` key.
+                
+        Returns:
+            list. Returns a list of dicts where each dict is a user record
+        """
+        return self._get_all_paginated_results(
+            f"{self.url_api_3}/group/member",
+            parameters={'groupname': group['name']}
+        )
+    
     def get_all_groups_with_members(self):
         """This obtains all groups in the Jira instances and includes a new key in the group record
         `member` and adds all users records in the key that have membership in the group.
@@ -156,10 +173,7 @@ class JiraClient:
         """
         groups = self.get_all_groups()
         for group in groups:
-            group['members'] = self._get_all_paginated_results(
-                f"{self.url_api_3}/group/member",
-                params={'groupname': group['name']}
-            )
+            group['members'] = self.get_group_members(group)
         return groups
 
     def add_user_to_group(self, group, user):
