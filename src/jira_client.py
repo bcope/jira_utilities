@@ -142,7 +142,7 @@ class JiraClient:
         https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-groups/#api-rest-api-3-group-bulk-get
 
         Returns:
-            list: Returns a list of dicts where each dict is a group records
+            list: Returns a list of dicts where each dict is a group record
         """
         all_groups = self._get_all_paginated_results(f"{self.url_api_3}/group/bulk")
         valid_groups = [g for g in all_groups if not g['name'].startswith('atlassian-addons')]
@@ -169,7 +169,7 @@ class JiraClient:
         `member` and adds all users records in the key that have membership in the group.
 
         Returns:
-            list: Returns a list of dicts where each dict is a group records
+            list: Returns a list of dicts where each dict is a group record
         """
         groups = self.get_all_groups()
         for group in groups:
