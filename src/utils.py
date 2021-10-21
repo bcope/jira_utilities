@@ -8,7 +8,6 @@ def get_logger(name, debug=False, info=True):
         '%(asctime)s %(name)s %(levelname)s %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    # NOTE(bcope@globalgiving.org): unclear if this is the best point to call this
     logging.captureWarnings(True)
     logger.setLevel(logging.WARNING)
     if info:
@@ -25,10 +24,10 @@ def y_n_input(prompt):
     answer = None
     invalid_prefix = ''
     while not answer:
-        input_prompt = f'{invalid_prefix}{prompt} (y/n):'
-        _LOGGER.debug(f'Prompting the user: "{input_prompt}"')
+        input_prompt = f"{invalid_prefix}{prompt} (y/n):"
+        _LOGGER.debug(f"Prompting the user: '{input_prompt}'")
         validity_unverified = input(input_prompt)
-        _LOGGER.debug(f'User response: "{validity_unverified}"')
+        _LOGGER.debug(f"User response: '{validity_unverified}'")
         if validity_unverified in ['y', 'Y', 'n', 'N']:
             if validity_unverified in ['y', 'Y']:
                 return True
