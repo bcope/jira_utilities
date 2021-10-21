@@ -214,3 +214,130 @@ class JiraClient:
             params={'groupname': group['name'], 'accountId': user['accountId']}
         )
         return response
+
+    ### FIELD METHODS ###
+    def get_all_fields(self):
+        """Get all fields for Jira instance
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-fields/#api-rest-api-3-field-get
+        
+        Returns:
+            list: list of dicts of all fields
+
+        Raises:
+            RuntimeError: raises this error if API call doesn't return a 200 status code
+        """
+        response = self._session.get(
+            f"{self.url_api_3}/field"
+        )
+        if response.status != 200:
+            raise RuntimeError(f"API called failed. Reason: {response.reason}. JSON: {response.json()}")
+        return response.json()
+
+    def get_field_by_name(self, name, exact_match=True):
+        """Get one field that matches a passed string
+        
+        Args:
+            name (str): the string to be used to identify a matching field.
+
+        Kwargs:
+            exact_match (bool): by default only a field with a name with an exact match will be 
+                returned. User can set to False to find a field that contains the passed string.
+
+        Returns:
+            dict or None: will either return a single dict of the single matching field or None if 
+                no matching fields
+        
+        Raises:
+            RuntimeError: if more than one field matches raises an error
+        """
+        fields = self.get_all_fields()
+        if exact_match:
+            matching_fields = [f for f in fields if f['name'] == name]
+        else:
+            matching_fields = [f for f in fields if name in f['name']]
+        
+        if not matching_fields:
+            return None
+        elif len(matching_fields) == 1:
+            return matching_fields[0]
+        else:
+            raise RuntimeError(f"More than one field matching '{name}': {matching_fields}")
+
+    def get_all_custom_field_contexts(self, field_id, parameters={}):
+        """Get contexts for a custom field
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-custom-field-contexts/#api-rest-api-3-field-fieldid-context-get
+
+        Args:
+            field_id (str): The ID of the custom field.
+
+        Kwargs:
+            parameters (dict): dict with any of the following keys: isAnyIssueType, isGlobalContext, 
+                contextId, startAt, maxResults. See API documenation for more info
+
+        Returns:
+            list: list of dicts of contexts
+        """
+        results = self._get_all_paginated_results(
+            f"{self.url_api_3}/field/{field_id}/context",
+            parameters=parameters
+        )
+        return results
+    
+    def get_all_custom_field_options_by_context(self, field_id, context_id, parameters={}):
+        """Get options from a fields
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-custom-field-options/#api-rest-api-3-field-fieldid-context-contextid-option-get
+        
+        Args:
+            field_id (str): The ID of the custom field.
+            context_id (str): The ID of the context.
+
+        Kwargs:
+            parameters (dict): dict with any of the following keys: optionId, onlyOptions, startAt, 
+                maxResults. See API documentation for more info.
+
+        Returns:
+            list: list of dicts representing options
+        """
+        results = self._get_all_paginated_results(
+            f"{self.url_api_3}/field/{field_id}/context/{context_id}/option",
+            params=parameters
+        )
+        return results
+
+    def update_custom_field_options_by_context(self, field_id, context_id, options):
+        """Update one or more options for a custom field by context
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-custom-field-options/#api-rest-api-3-field-fieldid-context-contextid-option-put
+        
+        Args:
+            field_id (str): The ID of the custom field.
+            context_id (str): The ID of the context.
+            options (list[dict]): A list of dicts of options with at leas the following keys: id, 
+                value, disabled. See API documentation for more info.
+        
+        Returns:
+            requests.Response: returns the response of the API call
+        """
+        response = self._session.put(
+            f"{self.url_api_3}/field/{field_id}/context/{context_id}/option",
+            json={'options': options}
+        )
+        return response
+
+    def create_custom_field_options_by_context(self, field_id, context_id, options):
+        """Update one or more options for a custom field by context
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issue-custom-field-options/#api-rest-api-3-field-fieldid-context-contextid-option-post
+        
+        Args:
+            field_id (str): The ID of the custom field.
+            context_id (str): The ID of the context.
+            options (list[dict]): A list of dicts of options with at leas the following keys: value,
+                disabled. See API documentation for more info.
+        
+        Returns:
+            requests.Response: returns the response of the API call
+        """
+        response = self._session.post(
+            f"{self.url_api_3}/field/{field_id}/context/{context_id}/option",
+            json={'options': options}
+        )
+        return response
