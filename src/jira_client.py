@@ -37,6 +37,8 @@ class JiraClient:
 
         Args:
             url (str): The full url of the API endpoint.
+
+        Kwargs:
             results_key (str): The name of the key in the results that contains the list of results.
                 Defaults to 'values'.
             parameters (dict): If use_post is False, URL parameters. If use_post is True, json
@@ -86,6 +88,8 @@ class JiraClient:
 
         Args:
             url (str): The full url of the API endpoint.
+
+        Kwargs:
             results_key (str): The name of the key in the results that contains the list of results.
                 Defaults to 'values'.
             parameters (dict): If use_post is False, URL parameters. If use_post is True, json
@@ -157,7 +161,7 @@ class JiraClient:
                 `name` key.
                 
         Returns:
-            list. Returns a list of dicts where each dict is a user record
+            list: Returns a list of dicts where each dict is a user record
         """
         return self._get_all_paginated_results(
             f"{self.url_api_3}/group/member",
