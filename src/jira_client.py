@@ -105,6 +105,27 @@ class JiraClient:
             results.append(result)
         return results
     
+    def get(self, url, params=None, json=None, agile=False):
+        """This is a shortcut method. Consider removing after initial development.
+        
+        Args:
+            url (str): This is the part of the url that comes after either url_api_3 or url_agile_1
+        
+        Kwargs:
+            params (dict): This gets passed to the params kwarg of _session.get
+            json (dict): This gets passed to the json kwarg of _session.get
+            agile (bool): This can be set to True to use url_agile_1 instead of url_api_3
+
+        Returns:
+            requests.Response
+        """
+        resp = self._session.get(
+            f"{self.url_agile_1 if agile else self.url_api_3}/{url}",
+            params=params,
+            json=json
+        )
+        return resp
+    
     ### GROUP METHODS ###
     def create_group(self, group):
         """API wrapper function to create a group
