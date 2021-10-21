@@ -341,3 +341,189 @@ class JiraClient:
             json={'options': options}
         )
         return response
+
+    ### COMPONENT RELATED ###
+    def get_project_components(self, project_key):
+        """Get all components for a project
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-project-components/#api-rest-api-3-project-projectidorkey-components-get
+        
+        Args:
+            project_key (str): the key for the project in Jira
+        
+        Returns:
+            list[dict]: returns a list of the project components
+
+        Raises:
+            RuntimeError: raises an error if the call fails
+        """
+        response = self._session.get(
+            f"{self.url_api_3}/project/{project_key}/components"
+        )
+        if response.status_code != 200:
+            raise RuntimeError(f"The call failed with a {response.status_code}: {response.reason}; JSON: {response.json()}")
+        return response.json()
+
+    def create_component(self, project_key, name, lead_account_id, description='', assignee_type='PROJECT_DEFAULT'):
+        """Create a component in a project
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-project-components/#api-rest-api-3-component-post
+        
+        Args:
+            project_key (str): The key of the project the component is assigned to. Required when 
+                creating a component. Can't be updated.
+            name (str): The unique name for the component in the project. Required when creating a 
+                component. Optional when updating a component. The maximum length is 255 characters.
+            lead_account_id (str): The accountId of the component's lead user. The accountId uniquely 
+                identifies the user across all Atlassian products. For example, 
+                5b10ac8d82e05b22cc7d4ef5. Max length: 128.
+            
+        Kwargs:
+            description (str): The description for the component. Optional when creating or 
+                updating a component.
+            assignee_type (str): The nominal user type used to determine the assignee for issues 
+                created with this component. See realAssigneeType for details on how the type of 
+                the user, and hence the user, assigned to issues is determined. Can take the 
+                following values:
+                    PROJECT_LEAD the assignee to any issues created with this component is 
+                        nominally the lead for the project the component is in.
+                    COMPONENT_LEAD the assignee to any issues created with this component is 
+                        nominally the lead for the component.
+                    UNASSIGNED an assignee is not set for issues created with this component.
+                    PROJECT_DEFAULT the assignee to any issues created with this component is 
+                        nominally the default assignee for the project that the component is in.
+                Default value: PROJECT_DEFAULT. Optional when creating or updating a component.
+                Valid values: PROJECT_DEFAULT, COMPONENT_LEAD, PROJECT_LEAD, UNASSIGNED
+
+        Returns:
+            requests.Response: returns the response of the API call
+        """
+        response = self._session.post(
+            f"{self.url_api_3}/component",
+            json={
+                'project': project_key,
+                'name': name,
+                'description': description,
+                'leadAccountId': lead_account_id,
+                'assigneeType': assignee_type,
+            }
+        )
+        if response.status_code != 201:
+            _LOGGER.warning(f"Call to create new component `{name}` in {project_key} failed with status code: {response.status_code}; Reason: {response.reason}; JSON: {response.json()}")
+        return response
+
+    def update_component(self, component_id, name=None, description=None, lead_account_id=None, assignee_type=None):
+        """Update a component in a project
+        https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-project-components/#api-rest-api-3-component-id-put
+
+        Args:
+            component_id (str): The ID of the component.
+        
+        Kwargs:
+            name (str): The unique name for the component in the project. Optional when updating a 
+                component. The maximum length is 255 characters.
+            description (str): The description for the component. Optional when updating a 
+                component.
+            lead_account_id (str): The accountId of the component's lead user. The accountId 
+                uniquely identifies the user across all Atlassian products. For example, 
+                5b10ac8d82e05b22cc7d4ef5. Max length: 128
+            assignee_type (str): The nominal user type used to determine the assignee for issues 
+                created with this component. See realAssigneeType for details on how the type of 
+                the user, and hence the user, assigned to issues is determined. Can take the 
+                following values:
+                    PROJECT_LEAD the assignee to any issues created with this component is 
+                        nominally the lead for the project the component is in.
+                    COMPONENT_LEAD the assignee to any issues created with this component is 
+                        nominally the lead for the component.
+                    UNASSIGNED an assignee is not set for issues created with this component.
+                    PROJECT_DEFAULT the assignee to any issues created with this component is 
+                        nominally the default assignee for the project that the component is in.
+                Optional when updating a component.
+
+        Returns:
+            requests.Response: returns the response of the API call
+        """
+        update = {}
+        if name is not None:
+            update['name'] = name
+        if description is not None:
+            update['description'] = description
+        if lead_account_id is not None:
+            update['leadAccountId'] = lead_account_id
+        if assignee_type is not None:
+            update['assigneeType'] = assignee_type
+        response = self._session.put(
+            f"{self.url_api_3}/component/{component_id}",
+            json=update
+        )
+        if response.status_code != 200:
+            _LOGGER.warning(f"Call to update the component {component_id} {name} failed with status code: {response.status_code}; Reason: {response.reason}; JSON: {response.json()}")
+        return response
+
+    def create_or_update_components(self, project_key, components):
+        """Create components in bulk. If component of the same name already exists, the existing
+        component will be updated.
+
+        Args:
+            project_key (str):
+            components (list[dict]): a list of components with the following keys:
+                name (str): The unique name for the component in the project. The maximum length 
+                    is 255 characters.
+                description (str): The description for the component.
+                lead_account_id (str): The accountId of the component's lead user. The accountId 
+                    uniquely identifies the user across all Atlassian products. For example, 
+                    5b10ac8d82e05b22cc7d4ef5. Max length: 128
+                assignee_type (str): The nominal user type used to determine the assignee for 
+                    issues created with this component. See realAssigneeType for details on how the 
+                    type of the user, and hence the user, assigned to issues is determined. Can 
+                    take the following values:
+                        PROJECT_LEAD the assignee to any issues created with this component is 
+                            nominally the lead for the project the component is in.
+                        COMPONENT_LEAD the assignee to any issues created with this component is 
+                            nominally the lead for the component.
+                        UNASSIGNED an assignee is not set for issues created with this component.
+                        PROJECT_DEFAULT the assignee to any issues created with this component is 
+                            nominally the default assignee for the project that the component is in.
+        
+        Returns:
+            list[dict]: a list of dicts of successfully updated components
+        """
+        existing_components = self.get_project_components(project_key)
+        _LOGGER.debug(f"Components already existing in project {project_key}:")
+        _LOGGER.debug([c.get('name') for c in existing_components])
+        created_updated_components = []
+        errors = []
+        for c in components:
+            exists = False
+            for ec in existing_components:
+                if c['name'] == ec['name']:
+                    exists = ec
+                    break
+            if exists:
+                response = self.update_component(
+                    exists['id'],
+                    name=c['name'],
+                    description=c['description'],
+                    lead_account_id=c['lead_account_id'],
+                    assignee_type=c['assignee_type'],
+                )
+            else:
+                response = self.create_component(
+                    project_key,
+                    c['name'],
+                    c['lead_account_id'],
+                    description=c['description'],
+                    assignee_type=c['assignee_type'],
+                )
+            if response.status_code == 200:
+                _LOGGER.debug(f"Component {c['name']} updated in {project_key}")
+                created_updated_components.append(response.json())
+            elif response.status_code == 201:
+                _LOGGER.debug(f"Component {c['name']} created in {project_key}")
+                created_updated_components.append(response.json())
+            else:
+                _LOGGER.error(f"""Call to create/update component "{c['name']}" failed with status code {response.status_code}""")
+                _LOGGER.error(f"Reason: {response.reason}")
+                _LOGGER.error(f"JSON: {response.json()}")
+                errors.append(c)
+        if errors:
+            _LOGGER.error(f"There were {len(errors)}: {errors}")
+        return created_updated_components
